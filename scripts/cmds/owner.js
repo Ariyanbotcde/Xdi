@@ -30,13 +30,13 @@ module.exports = {
   𝗢𝗪𝗡𝗘𝗥 𝗣𝗥𝗢𝗙𝗜𝗟𝗘 
 ╚═════════╝
 ╭──────────⭓
-│💌𝗡𝗮𝗺𝗲 :    亗•𝘔𝘈𝘔𝘜𝘕✿᭄
-│🧸𝗡𝗶𝗰𝗸      :  Vondo
-│🔮 𝗔𝗴𝗲       : 20
-│🖤 𝗦𝘁𝗮𝘁𝘂𝘀   :  Single
+│💌𝗡𝗮𝗺𝗲 :  ARIYA'N BB'Z 
+│🧸𝗡𝗶𝗰𝗸      :  Aruu
+│🔮 𝗔𝗴𝗲       : 21+
+│🖤 𝗦𝘁𝗮𝘁𝘂𝘀   : Vondami 
 │✡️ 𝗣𝗿𝗼𝗳𝗲𝘀𝘀𝗶𝗼𝗻 :  Student
- | 🚸𝗘𝗱𝘂𝗰𝗮𝘁𝗶𝗼𝗻 :   Inter 2nd Year
-│🔶 𝗟𝗼𝗰𝗮𝘁𝗶𝗼𝗻  :  Khulna
+ | 🚸𝗘𝗱𝘂𝗰𝗮𝘁𝗶𝗼𝗻 :   Honor's 1st Year
+│🔶 𝗟𝗼𝗰𝗮𝘁𝗶𝗼𝗻  :  DHAKA KERANIGONJ 
 ╰──────────⭓
 ╭─────────⭓
  |🆙  ${hours}h ${minutes}m ${seconds}s
@@ -45,7 +45,7 @@ module.exports = {
 ╰─────────⭓
 ╭──────────⭓
 │💠 WhatsApp
-│🆔  wa.me/01830981279
+│🆔  wa.me/01704471566
 ╰──────────⭓
 `;
 
