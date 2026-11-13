@@ -2,10 +2,10 @@
 
 <img src="https://capsule-render.vercel.app/api?type=waving&color=0:050A30,50:243B80,100:654EA3&height=180&section=header&text=MAMUN%20%7C%20GOAT%20BOT%20V3&fontSize=36&fontColor=EAF6FF&fontAlignY=38&animation=fadeIn&font=Orbitron" width="100%" />
   <p>
-    <a href="https://github.com/MAMUN-GOAT-BOT">
+    <a href="https://github.com/ARIYAN-GOAT-BOT">
       <img src="https://img.shields.io/badge/GitHub-000000?style=for-the-badge&logo=github&logoColor=white">
     </a>
-    <a href="https://www.facebook.com/xdi404">
+    <a href="https://www.facebook.com/aruuhbbz">
       <img src="https://img.shields.io/badge/Facebook-1877F2?style=for-the-badge&logo=facebook&logoColor=white">
     </a>
     <a href="https://t.me/mamun7586">
@@ -28,10 +28,10 @@
 <tr>
   <td width="50%">
     <pre>
-<b>ɴᴀᴍᴇ     :</b> ᴍᴀᴍᴜɴ
-<b>ʟᴏᴄᴀᴛɪᴏɴ :</b> ᴋʜᴜʟɴᴀ, ʙᴀɴɢʟᴀᴅᴇꜱʜ
-<b>ᴀɢᴇ      :</b> 20+
-<b>ᴘʜᴏɴᴇ    :</b> 01830981279
+<b>ɴᴀᴍᴇ     :</b> ariYa'n 
+<b>ʟᴏᴄᴀᴛɪᴏɴ :</b> DHK, ʙᴀɴɢʟᴀᴅᴇꜱʜ
+<b>ᴀɢᴇ      :</b> 21+
+<b>ᴘʜᴏɴᴇ    :</b> 01704471566
 <b>ʟᴇᴀʀɴɪɴɢ :</b> ᴊᴀᴠᴀꜱᴄʀɪᴘᴛ & ɴᴏᴅᴇ.ᴊꜱ
 <b>ᴘʀᴏᴊᴇᴄᴛ  :</b> ɢᴏᴀᴛ ʙᴏᴛ ᴠ3
 <b>ʜᴏʙʙʏ    :</b> ᴄᴏᴅɪɴɢ • ɢᴀᴍɪɴɢ • ᴍᴜꜱɪᴄ 🎵    </pre>
