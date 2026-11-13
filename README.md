@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="https://capsule-render.vercel.app/api?type=waving&color=0:050A30,50:243B80,100:654EA3&height=180&section=header&text=MAMUN%20%7C%20GOAT%20BOT%20V3&fontSize=36&fontColor=EAF6FF&fontAlignY=38&animation=fadeIn&font=Orbitron" width="100%" />
+<img src="https://capsule-render.vercel.app/api?type=waving&color=0:050A30,50:243B80,100:654EA3&height=180&section=header&text=ARIYAN%20%7C%20GOAT%20BOT%20V3&fontSize=36&fontColor=EAF6FF&fontAlignY=38&animation=fadeIn&font=Orbitron" width="100%" />
   <p>
     <a href="https://github.com/ARIYAN-GOAT-BOT">
       <img src="https://img.shields.io/badge/GitHub-000000?style=for-the-badge&logo=github&logoColor=white">
@@ -8,10 +8,10 @@
     <a href="https://www.facebook.com/aruuhbbz">
       <img src="https://img.shields.io/badge/Facebook-1877F2?style=for-the-badge&logo=facebook&logoColor=white">
     </a>
-    <a href="https://t.me/mamun7586">
+    <a href="https://t.me/aruuhbbz">
       <img src="https://img.shields.io/badge/Telegram-26A5E4?style=for-the-badge&logo=telegram&logoColor=white">
     </a>
-    <a href="https://wa.me/8801830981279">
+    <a href="https://wa.me/8801704471566">
       <img src="https://img.shields.io/badge/WhatsApp-25D366?style=for-the-badge&logo=whatsapp&logoColor=white">
     </a>
     <a href="https://youtu.be/_Qb7Pq0Xavs">
@@ -37,7 +37,7 @@
 <b>ʜᴏʙʙʏ    :</b> ᴄᴏᴅɪɴɢ • ɢᴀᴍɪɴɢ • ᴍᴜꜱɪᴄ 🎵    </pre>
   </td>
   <td width="50%" align="center">
-    <img src="https://github-readme-streak-stats.herokuapp.com/?user=MAMUN-GOAT-BOT&theme=tokyonight&hide_border=true&background=0D1117" width="100%"/>
+    <img src="https://github-readme-streak-stats.herokuapp.com/?user=ARIYAN-GOAT-BOT&theme=tokyonight&hide_border=true&background=0D1117" width="100%"/>
   </td>
 </tr>
 </table>
