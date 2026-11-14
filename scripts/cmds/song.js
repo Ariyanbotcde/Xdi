@@ -1,138 +1,100 @@
-const axios = require("axios");
 const fs = require('fs-extra');
 const path = require('path');
-
-const baseApiUrl = async () => {
-        const base = await axios.get(`https://raw.githubusercontent.com/aura-mahmud/HINATA/main/baseApiUrl.json`);
-        return base.data.mahmud;
-};
+const yts = require('yt-search');
+const ytdl = require('@distube/ytdl-core');
 
 module.exports = {
-        config: {
-                name: "song",
-                version: "2.8",
-                author: "MahMUD",
-                countDown: 10,
-                role: 0,
-                description: {
-                        en: "Download songs/audio from YouTube",
-                        vi: "Tải nhạc từ YouTube"
-                },
-                category: "music",
-                guide: {
-                        en: '   {pn} [song name or link]\n   Example: {pn} stay justin bieber',
-                        vi: '   {pn} [tên bài hát hoặc link]\n   Ví dụ: {pn} see you again'
-                }
-        },
+  config: {
+    name: "song",
+    version: "4.0",
+    author: "ARIYA'N BB'Z",
+    countDown: 5,
+    role: 0,
+    category: "music",
+    guide: "{pn} <gaan er naam>"
+  },
+  langs: {
+    en: {
+      noResult: "⭕ | No results for %1",
+      choose: "Song Results:\n\n%1\nReply with a number to download.",
+      success: "✅ | Downloaded: %1"
+    }
+  },
+  onStart: async function ({ api, args, event, commandName, getLang }) {
+    const { threadID, messageID, senderID } = event;
+    const input = args.join(" ");
+    if (!input) return api.sendMessage("Gaan er naam dao! Ex: song tum hi ho", threadID, messageID);
 
-        langs: {
-                en: {
-                        error: "× API error: %1. Contact MahMUD for help.\n•WhatsApp: 01836298139",
-                        noResult: "⭕ | No search results match the keyword %1",
-                        choose: "Song Results:\n\n%1\nReply with a number to download.",
-                        success: "✅ | Successfully Downloaded: %1"
-                },
-                vi: {
-                        error: "× API error: %1. Contact MahMUD for help.\n•WhatsApp: 01836298139",
-                        noResult: "⭕ | Không có kết quả tìm kiếm nào phù hợp với từ khóa %1",
-                        choose: "Danh sách bài hát:\n\n%1\nReply với số để tải xuống.",
-                        success: "✅ | Tải xuống thành công: %1"
-                }
-        },
+    try {
+      api.setMessageReaction("⏳", messageID, () => {}, true);
 
-        onStart: async function ({ api, args, message, event, commandName, getLang }) {
-                const authorName = String.fromCharCode(77, 97, 104, 77, 85, 68); 
-                if (this.config.author !== authorName) {
-                        return api.sendMessage("You are not authorized to change the author name.", event.threadID, event.messageID);
-                }
+      // DIRECT YOUTUBE SEARCH - Kono API nai
+      const search = await yts(input);
+      const results = search.videos.slice(0, 6);
+      if (!results.length) return api.sendMessage(getLang("noResult", input), threadID, messageID);
 
-                const { threadID, messageID, senderID } = event;
-                const input = args.join(" ");
+      // Jodi 1 ta e match kore, direct download - list dekhabe na
+      // List dekhte chaile niche 6 ta dekhabe
+      let msg = "";
+      const cacheDir = path.join(__dirname, 'cache');
+      if (!fs.existsSync(cacheDir)) fs.mkdirSync(cacheDir, { recursive: true });
+      const attachments = [];
 
-                if (!input) return api.sendMessage("• Please provide a song name or send link.", threadID, messageID);
-
-                const checkurl = /^(?:https?:\/\/)?(?:m\.|www\.)?(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=|shorts\/))((\w|-){11})(?:\S+)?$/;
-
-                if (checkurl.test(input)) {
-                        const videoID = input.match(checkurl)[1];
-                        api.setMessageReaction("⌛", messageID, () => {}, true);
-                        return handleDownload(api, threadID, messageID, videoID, getLang);
-                }
-
-                try {
-                        api.setMessageReaction("⏳", messageID, () => {}, true);
-                        const res = await axios.get(`${await baseApiUrl()}/api/ytb/search?q=${encodeURIComponent(input)}`);
-                        const results = res.data.results.slice(0, 6);
-                        
-                        if (!results || results.length === 0) return api.sendMessage(getLang("noResult", input), threadID, messageID);
-
-                        let msg = "";
-                        const attachments = [];
-                        const cacheDir = path.join(__dirname, 'cache');
-                        if (!fs.existsSync(cacheDir)) fs.mkdirSync(cacheDir, { recursive: true });
-
-                        for (let i = 0; i < results.length; i++) {
-                                msg += `${i + 1}. ${results[i].title}\nTime: ${results[i].time}\n\n`;
-                                const thumbPath = path.join(cacheDir, `thumb_${senderID}_${Date.now()}_${i}.jpg`);
-                                const thumbRes = await axios.get(results[i].thumbnail, { responseType: 'arraybuffer' });
-                                fs.writeFileSync(thumbPath, Buffer.from(thumbRes.data));
-                                attachments.push(fs.createReadStream(thumbPath));
-                        }
-
-                        return api.sendMessage({
-                                body: getLang("choose", msg),
-                                attachment: attachments
-                        }, threadID, (err, info) => {
-                                attachments.forEach(stream => { if (fs.existsSync(stream.path)) fs.unlinkSync(stream.path); });
-                                global.GoatBot.onReply.set(info.messageID, { 
-                                        commandName, 
-                                        author: senderID, 
-                                        results,
-                                        menuMessageID: info.messageID
-                                });
-                        }, messageID);
-
-                } catch (e) {
-                        return api.sendMessage(getLang("error", e.message), threadID, messageID);
-                }
-        },
-
-        onReply: async function ({ event, api, Reply, getLang }) {
-                const { results, author, menuMessageID } = Reply;
-                if (event.senderID !== author) return;
-                
-                const targetMessageID = menuMessageID || Reply.messageID;
-                
-                const choice = parseInt(event.body);
-                if (isNaN(choice) || choice <= 0 || choice > results.length) {
-                        return api.unsendMessage(targetMessageID);
-                }
-                
-                const videoID = results[choice - 1].id;
-                
-                api.unsendMessage(targetMessageID);
-                api.setMessageReaction("⌛", event.messageID, () => {}, true);
-               
-                await handleDownload(api, event.threadID, event.messageID, videoID, getLang);
-        }
-};
-
-async function handleDownload(api, threadID, messageID, videoID, getLang) {
+      for (let i = 0; i < results.length; i++) {
+        msg += `${i + 1}. ${results[i].title}\nTime: ${results[i].timestamp}\n\n`;
         try {
-                const res = await axios.get(`${await baseApiUrl()}/api/ytb/get?id=${videoID}&type=audio`);
-                const { title, downloadLink } = res.data.data;
-                
-                const response = await axios({ url: downloadLink, method: 'GET', responseType: 'stream' });
-                const stream = response.data;
-                stream.path = `music_${Date.now()}.mp3`;
+          const thumbPath = path.join(cacheDir, `thumb_${Date.now()}_${i}.jpg`);
+          const axios = require("axios");
+          const t = await axios.get(results[i].thumbnail, { responseType: 'arraybuffer', timeout: 8000 });
+          fs.writeFileSync(thumbPath, Buffer.from(t.data));
+          attachments.push(fs.createReadStream(thumbPath));
+        } catch {}
+      }
 
-                api.sendMessage({
-                        body: getLang("success", title),
-                        attachment: stream
-                }, threadID, () => {
-                        api.setMessageReaction("✅", messageID, () => {}, true);
-                }, messageID);
-        } catch (e) {
-                api.sendMessage(getLang("error", "Download failed!"), threadID, messageID);
-        }
-}
+      return api.sendMessage({ body: getLang("choose", msg), attachment: attachments }, threadID, (err, info) => {
+        attachments.forEach(s => { try { if (fs.existsSync(s.path)) fs.unlinkSync(s.path); } catch {} });
+        global.GoatBot.onReply.set(info.messageID, { commandName, author: senderID, results, menuMessageID: info.messageID });
+      }, messageID);
+
+    } catch (e) {
+      console.log(e);
+      return api.sendMessage("Abar try koro!", threadID, messageID);
+    }
+  },
+  onReply: async function ({ event, api, Reply, getLang }) {
+    if (event.senderID !== Reply.author) return;
+    const choice = parseInt(event.body);
+    if (isNaN(choice) || choice <= 0 || choice > Reply.results.length) return api.unsendMessage(Reply.menuMessageID);
+    const video = Reply.results[choice - 1];
+    api.unsendMessage(Reply.menuMessageID);
+    api.setMessageReaction("⌛", event.messageID, () => {}, true);
+
+    const cacheDir = path.join(__dirname, 'cache');
+    const filePath = path.join(cacheDir, `song_${Date.now()}.mp3`);
+
+    try {
+      // DIRECT DOWNLOAD - ytdl-core
+      await new Promise((resolve, reject) => {
+        const stream = ytdl(video.url, { filter: 'audioonly', quality: 'highestaudio', highWaterMark: 1 << 25 });
+        const ws = fs.createWriteStream(filePath);
+        stream.pipe(ws);
+        stream.on('error', reject);
+        ws.on('finish', resolve);
+        ws.on('error', reject);
+      });
+
+      api.sendMessage({
+        body: getLang("success", video.title),
+        attachment: fs.createReadStream(filePath)
+      }, event.threadID, () => {
+        if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
+        api.setMessageReaction("✅", event.messageID, () => {}, true);
+      });
+
+    } catch (e) {
+      console.log("Download Error:", e.message);
+      if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
+      api.sendMessage("Download fail, abar try koro!", event.threadID, event.messageID);
+    }
+  }
+};
