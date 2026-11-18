@@ -55,7 +55,7 @@ module.exports = {
       global.GoatBot?.config?.prefix || "-";
 
     const botNickname =
-      "ᴘᴏᴏᴋɪᴇ 🌚🎀 ";
+      "—͟͞ARIYAn —͟͞𝖻𝖻'𝗓🎀✨ ";
 
     let done = 0;
 
