@@ -1,246 +1,53 @@
-
-const { drive, getStreamFromURL, getExtFromUrl, getTime } = global.utils;
+const { drive } = global.utils;
 
 module.exports = {
 	config: {
-		name: "setwelcome",
-		aliases: ["setwc"],
+		name: "welcome",
 		version: "2.0",
-		author: "ariYa'n bb'z",
-		countDown: 5,
-		role: 1,
-
-		description: {
-			en: "Customize aesthetic welcome messages for your group."
-		},
-
-		category: "custom",
-
-		guide: {
-			en: {
-				body:
-					"{pn} on - Enable welcome\n" +
-					"{pn} off - Disable welcome\n" +
-					"{pn} text <content> - Set welcome text\n" +
-					"{pn} text reset - Reset welcome text\n" +
-					"{pn} file - Add welcome attachment\n" +
-					"{pn} file reset - Remove attachments\n\n" +
-					"Available shortcuts:\n" +
-					"• {userName} - Member name\n" +
-					"• {userNameTag} - Member tag\n" +
-					"• {boxName} - Group name\n" +
-					"• {multiple} - Member/members\n" +
-					"• {session} - Time of day\n\n" +
-					"Reply with an image/video/audio to add welcome media."
-			}
-		}
+		author: "ariYa'n",
+		description: "Aesthetic welcome"
 	},
-
 	langs: {
 		en: {
-			turnedOn: "╭━━━〔 ✨ WELCOME SYSTEM 〕━━━╮\n┃ 💗 Aesthetic Welcome: ON\n┃ 🌸 Your group is ready!\n╰━━━━━━━━━━━━━━━━━━━━╯",
-
-			turnedOff: "╭━━━〔 🌙 WELCOME SYSTEM 〕━━━╮\n┃ 🥀 Aesthetic Welcome: OFF\n┃ ✨ Welcome system disabled.\n╰━━━━━━━━━━━━━━━━━━━━╯",
-
-			missingContent: "❌ Please enter welcome message content!",
-
-			edited: "╭━━━〔 💌 WELCOME UPDATED 〕━━━╮\n\n%1\n\n╰━━━━━━━━━━━━━━━━━━━━╯",
-
-			reseted: "🌸 Welcome message reset successfully!",
-
-			noFile: "❌ No welcome attachment found!",
-
-			resetedFile: "🗑️ Welcome attachments removed successfully!",
-
-			missingFile: "📎 Please reply to this message with an image/video/audio!",
-
-			addedFile: "✨ Successfully added %1 welcome attachment(s)!"
+			defaultWelcome: "╭─── ✦ 𝐖𝐄𝐋𝐂𝐎𝐌𝐄 ✦ ───╮\n│\n│  🕊️ Hey {userNameTag} ✨\n│\n│  Welcome to — {boxName} 💌\n│  Hope {multiple} have a beautiful {session} here 🌸\n│\n│  ━━━━━━━━━━━━━━━\n│  🤍 Stay kind, stay active\n│  ✨ Enjoy your time with us\n│\n╰─── ✦ 𝐚𝐫𝐢𝐘𝐚'𝐧 𝐁𝐎𝐓 ✦ ───╯"
 		}
 	},
-
-	onStart: async function ({
-		args,
-		threadsData,
-		message,
-		event,
-		commandName,
-		getLang
-	}) {
-		const { threadID, senderID, body } = event;
+	onStart: async function ({ threadsData, message, event, api, getLang }) {
+		if (event.logMessageType !== "log:subscribe") return;
+		const { threadID } = event;
 		const { data, settings } = await threadsData.get(threadID);
+		if (settings.sendWelcomeMessage == false) return;
 
-		switch (args[0]) {
+		const { addedParticipants } = event.logMessageData;
+		const threadInfo = await api.getThreadInfo(threadID);
 
-			case "text": {
-				if (!args[1])
-					return message.reply(getLang("missingContent"));
+		const h = new Date().getHours();
+		let session = "day";
+		if (h >= 5 && h < 12) session = "morning ☀️";
+		else if (h >= 12 && h < 17) session = "afternoon 🌤️";
+		else if (h >= 17 && h < 21) session = "evening 🌇";
+		else session = "night 🌙";
 
-				if (args[1] === "reset") {
-					delete data.welcomeMessage;
+		for (const user of addedParticipants) {
+			if (user.userFbId == api.getCurrentUserID()) continue;
+			let msg = data.welcomeMessage || getLang("defaultWelcome");
+			msg = msg.replace(/\{userNameTag\}/g, `@${user.fullName}`)
+				.replace(/\{userName\}/g, user.fullName)
+				.replace(/\{boxName\}/g, threadInfo.threadName || "this group")
+				.replace(/\{multiple\}/g, addedParticipants.length > 1 ? "you guys" : "you")
+				.replace(/\{session\}/g, session);
+
+			let attachments = [];
+			if (data.welcomeAttachment?.length > 0) {
+				for (const id of data.welcomeAttachment) {
+					try { attachments.push(await drive.getFile(id, "stream")); } catch (e) {}
 				}
-				else {
-					const index = body.toLowerCase().indexOf("text");
-					data.welcomeMessage = body.slice(index + 4).trim();
-
-					if (!data.welcomeMessage)
-						return message.reply(getLang("missingContent"));
-				}
-
-				await threadsData.set(threadID, { data });
-
-				return message.reply(
-					data.welcomeMessage
-						? getLang("edited", data.welcomeMessage)
-						: getLang("reseted")
-				);
 			}
-
-			case "file": {
-				if (args[1] === "reset") {
-					if (!data.welcomeAttachment?.length)
-						return message.reply(getLang("noFile"));
-
-					await Promise.all(
-						data.welcomeAttachment.map(async fileId => {
-							try {
-								await drive.deleteFile(fileId);
-							}
-							catch (e) {}
-						})
-					);
-
-					delete data.welcomeAttachment;
-
-					await threadsData.set(threadID, { data });
-
-					return message.reply(getLang("resetedFile"));
-				}
-
-				if (
-					event.attachments.length === 0 &&
-					(!event.messageReply ||
-						event.messageReply.attachments.length === 0)
-				) {
-					return message.reply(getLang("missingFile"), (err, info) => {
-						if (err || !info) return;
-
-						global.GoatBot.onReply.set(info.messageID, {
-							messageID: info.messageID,
-							author: senderID,
-							commandName
-						});
-					});
-				}
-
-				return saveChanges(
-					message,
-					event,
-					threadID,
-					senderID,
-					threadsData,
-					getLang
-				);
-			}
-
-			case "on":
-			case "off": {
-				settings.sendWelcomeMessage = args[0] === "on";
-
-				await threadsData.set(threadID, { settings });
-
-				return message.reply(
-					settings.sendWelcomeMessage
-						? getLang("turnedOn")
-						: getLang("turnedOff")
-				);
-			}
-
-			default:
-				return message.SyntaxError();
+			message.send({
+				body: msg,
+				attachment: attachments,
+				mentions: [{ tag: `@${user.fullName}`, id: user.userFbId }]
+			});
 		}
-	},
-
-	onReply: async function ({
-		event,
-		Reply,
-		message,
-		threadsData,
-		getLang
-	}) {
-		const { threadID, senderID } = event;
-
-		if (senderID != Reply.author)
-			return;
-
-		if (
-			event.attachments.length === 0 &&
-			(!event.messageReply ||
-				event.messageReply.attachments.length === 0)
-		)
-			return message.reply(getLang("missingFile"));
-
-		return saveChanges(
-			message,
-			event,
-			threadID,
-			senderID,
-			threadsData,
-			getLang
-		);
 	}
 };
-
-async function saveChanges(
-	message,
-	event,
-	threadID,
-	senderID,
-	threadsData,
-	getLang
-) {
-	const { data } = await threadsData.get(threadID);
-
-	const attachments = [
-		...event.attachments,
-		...(event.messageReply?.attachments || [])
-	].filter(item =>
-		["photo", "png", "animated_image", "video", "audio"].includes(item.type)
-	);
-
-	if (!attachments.length)
-		return message.reply(getLang("missingFile"));
-
-	if (!data.welcomeAttachment)
-		data.welcomeAttachment = [];
-
-	let uploaded = 0;
-
-	try {
-		for (const attachment of attachments) {
-			const url = attachment.url;
-			if (!url) continue;
-
-			const ext = getExtFromUrl(url) || "bin";
-			const fileName = `${getTime()}.${ext}`;
-
-			const infoFile = await drive.uploadFile(
-				`setwelcome_${threadID}_${senderID}_${fileName}`,
-				await getStreamFromURL(url)
-			);
-
-			if (infoFile?.id) {
-				data.welcomeAttachment.push(infoFile.id);
-				uploaded++;
-			}
-		}
-
-		await threadsData.set(threadID, { data });
-
-		return message.reply(getLang("addedFile", uploaded));
-	}
-	catch (error) {
-		console.error("SetWelcome Upload Error:", error);
-		return message.reply("❌ Failed to upload welcome attachment!");
-	}
-				}
-	
