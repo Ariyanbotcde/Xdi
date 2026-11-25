@@ -24,8 +24,8 @@ const COLORS = {
 module.exports = {
     config: {
         name: "welcome",
-        version: "2.1.0",
-        author: "ARIYAN BBZ",
+        version: "1.0.0",
+        author: "𝐌𝐚𝐑𝐮𝐅",
         category: "events"
     },
 
