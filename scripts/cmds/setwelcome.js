@@ -1,130 +1,167 @@
-const fs = require("fs");
-const path = require("path");
 const { drive, getStreamFromURL, getExtFromUrl, getTime } = global.utils;
-
-function createWelcomeEvent() {
-	try {
-		const welcomePath = path.join(__dirname, "../events/welcome.js");
-		const welcomeCode = `
-const { drive, getStreamFromURL } = global.utils;
-const DEFAULT_WELCOME_PIC = "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=800&q=80";
-module.exports = {
-	config: { name: "welcome", version: "6.1", author: "ariYa'n", description: "Aesthetic welcome" },
-	langs: { en: { defaultWelcome: "𓂃 ࣪˖ ִֶָ 𓂃 ࣪˖ ִֶָ 𓂃 ࣪˖ ִֶָ 𓂃\\n\\n      ⋆ ˚｡⋆୨୧˚ 𝐖𝐄𝐋𝐂𝐎𝐌𝐄 ˚୨୧⋆｡˚ ⋆\\n\\n  𓂃 ࣪˖ ִֶָ 𓂃 ࣪˖ ִֶָ 𓂃 ࣪˖ ִֶָ 𓂃\\n\\n  hii {userNameTag} 𓇼 ⋆｡˚\\n  finally you are here ૮꒰˶• ༝ •˶꒱ა ♡\\n\\n  ⊹ ࣪ ˖ group : {boxName} ⊹\\n  ⊹ ࣪ ˖ time : {session} ⊹\\n  ⊹ ࣪ ˖ vibe : soft + pretty + aesthetic ⊹\\n\\n  ───── ୨୧ ─────\\n  🤍 stay kind, stay soft\\n  🌸 stay active, stay pretty\\n  🦋 make lots of memories here\\n  ───── ୨୧ ─────\\n\\n  welcome {multiple} to our little world ✨\\n  hope {multiple} have a beautiful {session} here 𓍯\\n\\n  𓂃 ࣪˖ ִֶָ 𓂃 ࣪˖ ִֶָ 𓂃 ࣪˖ ִֶָ 𓂃\\n       — 𝐚𝐫𝐢𝐘𝐚'𝐧 𝐁𝐎𝐓 ✦ —" } },
-	onStart: async function ({ threadsData, message, event, api, getLang }) {
-		try {
-			if (event.logMessageType !== "log:subscribe") return;
-			const { threadID } = event;
-			const { data, settings } = await threadsData.get(threadID);
-			if (settings.sendWelcomeMessage === false) return;
-			const { addedParticipants } = event.logMessageData;
-			if (!addedParticipants) return;
-			const threadInfo = await api.getThreadInfo(threadID);
-			const h = new Date().getHours();
-			let session = "day";
-			if (h >= 5 && h < 12) session = "morning ☀️🌸";
-			else if (h >= 12 && h < 17) session = "afternoon 🌤️🤍";
-			else if (h >= 17 && h < 21) session = "evening 🌇🦋";
-			else session = "night 🌙✨";
-			for (const user of addedParticipants) {
-				if (user.userFbId == api.getCurrentUserID()) continue;
-				let msg = data.welcomeMessage || getLang("defaultWelcome");
-				msg = msg.replace(/\\{userNameTag\\}/g, "@" + user.fullName).replace(/\\{userName\\}/g, user.fullName).replace(/\\{boxName\\}/g, threadInfo.threadName || "this group").replace(/\\{multiple\\}/g, addedParticipants.length > 1 ? "you guys" : "you").replace(/\\{session\\}/g, session);
-				let attachments = [];
-				if (data.welcomeAttachment && data.welcomeAttachment.length > 0) {
-					for (const id of data.welcomeAttachment) { try { attachments.push(await drive.getFile(id, "stream")); } catch (e) {} }
-				} else { try { attachments.push(await getStreamFromURL(DEFAULT_WELCOME_PIC)); } catch (e) {} }
-				await message.send({ body: msg, attachment: attachments, mentions: [{ tag: "@" + user.fullName, id: user.userFbId }] });
-			}
-		} catch (e) { console.log("WELCOME ERROR:", e); }
-	}
-};
-`;
-		fs.writeFileSync(welcomePath, welcomeCode);
-		console.log("✅ setwelcome: welcome.js force create done");
-		return true;
-	} catch (e) { console.log("CREATE ERROR:", e); return false; }
-}
-createWelcomeEvent();
 
 module.exports = {
 	config: {
 		name: "setwelcome",
 		aliases: ["setwc"],
-		version: "6.1",
-		author: "ariYa'n",
+		version: "1.7",
+		author: "NTKhang",
 		countDown: 5,
-		role: 0,
-		description: { en: "Aesthetic welcome 2 in 1" },
+		role: 2,
+		description: {
+			vi: "Chỉnh sửa nội dung tin nhắn chào mừng thành viên mới tham gia vào nhóm chat của bạn",
+			en: "Edit welcome message content when new member join your group chat"
+		},
 		category: "custom",
-		guide: { en: { body: "{pn} on | {pn} off | {pn} text <msg> | {pn} text reset | {pn} file" } }
-	},
-	langs: {
-		en: {
-			turnedOn: "✨ Aesthetic Welcome ON hoye gese 🤍\nWelcome event o banano hoise. Ebar bot 1 bar restart de.",
-			turnedOff: "Aesthetic Welcome OFF hoye gese",
-			missingContent: "Msg ta dao age",
-			edited: "Welcome msg change hoye gese:\n\n%1",
-			reseted: "Reset hoye gese, ekhon aesthetic default cholbe",
-			noFile: "Delete korar moto kono file nai",
-			resetedFile: "File delete hoye gese",
-			missingFile: "Pic/video reply diye dao",
-			addedFile: "✨ %1 ta file add hoye gese"
+		guide: {
+			vi: {
+				body: "   {pn} text [<nội dung> | reset]: chỉnh sửa nội dung văn bản hoặc reset về mặc định, với những shortcut có sẵn:"
+					+ "\n  + {userName}: tên của thành viên mới"
+					+ "\n  + {userNameTag}: tên của thành viên mới (tag)"
+					+ "\n  + {boxName}:  tên của nhóm chat"
+					+ "\n  + {multiple}: bạn || các bạn"
+					+ "\n  + {session}:  buổi trong ngày"
+					+ "\n\n   Ví dụ:"
+					+ "\n    {pn} text Hello {userName}, welcome to {boxName}, chúc {multiple} một ngày mới vui vẻ"
+					+ "\n"
+					+ "\n   Reply (phản hồi) hoặc gửi kèm một tin nhắn có file với nội dung {pn} file: để thêm tệp đính kèm vào tin nhắn chào mừng (ảnh, video, audio)"
+					+ "\n\n   Ví dụ:"
+					+ "\n    {pn} file reset: xóa gửi file",
+				attachment: {
+					[`${__dirname}/assets/guide/setwelcome/setwelcome_vi_1.png`]: "https://i.ibb.co/vd6bQrW/setwelcome-vi-1.png"
+				}
+			},
+			en: {
+				body: "   {pn} text [<content> | reset]: edit text content or reset to default, with some shortcuts:"
+					+ "\n  + {userName}: new member name"
+					+ "\n  + {userNameTag}: new member name (tag)"
+					+ "\n  + {boxName}:  group chat name"
+					+ "\n  + {multiple}: you || you guys"
+					+ "\n  + {session}:  session in day"
+					+ "\n\n   Example:"
+					+ "\n    {pn} text Hello {userName}, welcome to {boxName}, have a nice day {multiple}"
+					+ "\n"
+					+ "\n   Reply (phản hồi) or send a message with file with content {pn} file: to add file attachments to welcome message (image, video, audio)"
+					+ "\n\n   Example:"
+					+ "\n    {pn} file reset: delete file attachments",
+				attachment: {
+					[`${__dirname}/assets/guide/setwelcome/setwelcome_en_1.png`]: "https://i.ibb.co/vsCz0ks/setwelcome-en-1.png"
+				}
+			}
 		}
 	},
+
+	langs: {
+		vi: {
+			turnedOn: "Đã bật chức năng chào mừng thành viên mới",
+			turnedOff: "Đã tắt chức năng chào mừng thành viên mới",
+			missingContent: "Vui lùng nhập nội dung tin nhắn",
+			edited: "Đã chỉnh sửa nội dung tin nhắn chào mừng của nhóm bạn thành: %1",
+			reseted: "Đã reset nội dung tin nhắn chào mừng",
+			noFile: "Không có tệp đính kèm tin nhắn chào mừng nào để xóa",
+			resetedFile: "Đã reset tệp đính kèm thành công",
+			missingFile: "Hãy phản hồi tin nhắn này kèm file ảnh/video/audio",
+			addedFile: "Đã thêm %1 tệp đính kèm vào tin nhắn chào mừng của nhóm bạn"
+		},
+		en: {
+			turnedOn: "Turned on welcome message",
+			turnedOff: "Turned off welcome message",
+			missingContent: "Please enter welcome message content",
+			edited: "Edited welcome message content of your group to: %1",
+			reseted: "Reseted welcome message content",
+			noFile: "No file attachments to delete",
+			resetedFile: "Reseted file attachments successfully",
+			missingFile: "Please reply this message with image/video/audio file",
+			addedFile: "Added %1 file attachments to your group welcome message"
+		}
+	},
+
 	onStart: async function ({ args, threadsData, message, event, commandName, getLang }) {
 		const { threadID, senderID, body } = event;
 		const { data, settings } = await threadsData.get(threadID);
-		if (!args[0]) return message.reply("Use: !setwelcome on / off / text <msg>");
+
 		switch (args[0]) {
 			case "text": {
-				if (!args[1]) return message.reply(getLang("missingContent"));
-				else if (args[1] == "reset") delete data.welcomeMessage;
-				else data.welcomeMessage = body.slice(body.indexOf(args[0]) + args[0].length).trim();
-				await threadsData.set(threadID, { data });
+				if (!args[1])
+					return message.reply(getLang("missingContent"));
+				else if (args[1] == "reset")
+					delete data.welcomeMessage;
+				else
+					data.welcomeMessage = body.slice(body.indexOf(args[0]) + args[0].length).trim();
+				await threadsData.set(threadID, {
+					data
+				});
 				message.reply(data.welcomeMessage ? getLang("edited", data.welcomeMessage) : getLang("reseted"));
 				break;
 			}
 			case "file": {
 				if (args[1] == "reset") {
-					if (!data.welcomeAttachment) return message.reply(getLang("noFile"));
-					try { await Promise.all(data.welcomeAttachment.map(id => drive.deleteFile(id))); delete data.welcomeAttachment; } catch (e) {}
-					await threadsData.set(threadID, { data });
-					message.reply(getLang("resetedFile"));
-				} else if (event.attachments.length == 0 && (!event.messageReply || event.messageReply.attachments.length == 0))
-					return message.reply(getLang("missingFile"), (err, info) => {
-						global.GoatBot.onReply.set(info.messageID, { messageID: info.messageID, author: senderID, commandName });
+					const { welcomeAttachment } = data;
+					if (!welcomeAttachment)
+						return message.reply(getLang("noFile"));
+					try {
+						await Promise.all(data.welcomeAttachment.map(fileId => drive.deleteFile(fileId)));
+						delete data.welcomeAttachment;
+					}
+					catch (e) { }
+					await threadsData.set(threadID, {
+						data
 					});
-				else saveChanges(message, event, threadID, senderID, threadsData, getLang);
+					message.reply(getLang("resetedFile"));
+				}
+				else if (event.attachments.length == 0 && (!event.messageReply || event.messageReply.attachments.length == 0))
+					return message.reply(getLang("missingFile"), (err, info) => {
+						global.GoatBot.onReply.set(info.messageID, {
+							messageID: info.messageID,
+							author: senderID,
+							commandName
+						});
+					});
+				else {
+					saveChanges(message, event, threadID, senderID, threadsData, getLang);
+				}
 				break;
 			}
-			case "on": case "off": {
-				createWelcomeEvent();
+			case "on":
+			case "off": {
 				settings.sendWelcomeMessage = args[0] == "on";
 				await threadsData.set(threadID, { settings });
 				message.reply(settings.sendWelcomeMessage ? getLang("turnedOn") : getLang("turnedOff"));
 				break;
 			}
-			default: message.reply("Use: !setwelcome on / off / text <msg>"); break;
+			default:
+				message.SyntaxError();
+				break;
 		}
 	},
+
 	onReply: async function ({ event, Reply, message, threadsData, getLang }) {
 		const { threadID, senderID } = event;
-		if (senderID != Reply.author) return;
-		if (event.attachments.length == 0 && (!event.messageReply || event.messageReply.attachments.length == 0)) return message.reply(getLang("missingFile"));
+		if (senderID != Reply.author)
+			return;
+
+		if (event.attachments.length == 0 && (!event.messageReply || event.messageReply.attachments.length == 0))
+			return message.reply(getLang("missingFile"));
 		saveChanges(message, event, threadID, senderID, threadsData, getLang);
 	}
 };
 
 async function saveChanges(message, event, threadID, senderID, threadsData, getLang) {
 	const { data } = await threadsData.get(threadID);
-	const attachments = [...event.attachments, ...(event.messageReply?.attachments || [])].filter(i => ["photo", "png", "animated_image", "video", "audio"].includes(i.type));
-	if (!data.welcomeAttachment) data.welcomeAttachment = [];
-	await Promise.all(attachments.map(async a => {
-		const ext = getExtFromUrl(a.url);
-		const info = await drive.uploadFile(`setwelcome_${threadID}_${senderID}_${getTime()}.${ext}`, await getStreamFromURL(a.url));
-		data.welcomeAttachment.push(info.id);
+	const attachments = [...event.attachments, ...(event.messageReply?.attachments || [])].filter(item => ["photo", 'png', "animated_image", "video", "audio"].includes(item.type));
+	if (!data.welcomeAttachment)
+		data.welcomeAttachment = [];
+
+	await Promise.all(attachments.map(async attachment => {
+		const { url } = attachment;
+		const ext = getExtFromUrl(url);
+		const fileName = `${getTime()}.${ext}`;
+		const infoFile = await drive.uploadFile(`setwelcome_${threadID}_${senderID}_${fileName}`, await getStreamFromURL(url));
+		data.welcomeAttachment.push(infoFile.id);
 	}));
-	await threadsData.set(threadID, { data });
+
+	await threadsData.set(threadID, {
+		data
+	});
 	message.reply(getLang("addedFile", attachments.length));
-}
+		}
